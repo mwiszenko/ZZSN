@@ -3,6 +3,7 @@ from glob import glob
 import pandas as pd
 from PIL import Image
 from torch.utils.data import DataLoader, Dataset
+from tqdm import tqdm
 
 from zzsn.constants import *
 
@@ -21,12 +22,11 @@ class CustomImageDataset(Dataset):
         y_classes: list = []
         y_files: list = []
 
-        for i, lab in classes.iterrows():
-            alphabet, character, _ = lab["class"].split("/")
-            img_dir: str = os.path.join(data_dir, alphabet, character)
-            files: list[str] = sorted(glob(os.path.join(img_dir, "*.png")))
-            y_files.extend(files)
-            y_classes.extend([lab["class"]] * len(files))
+        tqdm.pandas()
+        classes.progress_apply(
+            lambda row: expand(row["class"], y_classes, y_files, data_dir),
+            axis=1,
+        )
 
         self.img_labels: pd.DataFrame = pd.DataFrame(
             {"file": y_files, "class": y_classes}
@@ -47,6 +47,16 @@ class CustomImageDataset(Dataset):
         if self.target_transform:
             label = self.target_transform(label)
         return image, label
+
+
+def expand(
+    label: str, all_classes: list[str], all_files: list[str], data_dir: str
+):
+    alphabet, character, _ = label.split("/")
+    img_dir: str = os.path.join(data_dir, alphabet, character)
+    files: list[str] = sorted(glob(os.path.join(img_dir, "*.png")))
+    all_classes.extend(files)
+    all_files.extend([label] * len(files))
 
 
 def read_image(path: str):
