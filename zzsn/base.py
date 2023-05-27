@@ -70,3 +70,10 @@ def create_dataset(split: str):
     )
     print("   Done")
     return ds
+
+
+def create_data_loader(ds: CustomImageDataset, split: str):
+    print("Creating {} data loader...".format(split))
+    dl: DataLoader = DataLoader(ds, batch_size=BATCH_SIZE, shuffle=True)
+    print("   Done")
+    return dl
