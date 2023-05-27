@@ -54,11 +54,7 @@ def read_image(path: str):
 
 
 def transform_image(img, rot: str):
-    # rotation
-    transformed_img = img.rotate(float(rot[3:]))
-    # scaling
-    transformed_img = transformed_img.resize((IMG_HEIGHT, IMG_WIDTH))
-    return transformed_img
+    return img.rotate(float(rot[3:])).resize((IMG_HEIGHT, IMG_WIDTH))
 
 
 def create_dataset(split: str):

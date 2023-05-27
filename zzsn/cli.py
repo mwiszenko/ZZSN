@@ -1,6 +1,6 @@
 from torch.utils.data import DataLoader
 
-from zzsn.base import CustomImageDataset, create_dataset, create_data_loader
+from zzsn.base import CustomImageDataset, create_data_loader, create_dataset
 
 
 def main():  # pragma: no cover
