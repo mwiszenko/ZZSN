@@ -43,7 +43,7 @@ def load(split: str):
     return df
 
 
-print("Loading dataset...")
+print("Loading {} dataset...".format(SPLIT))
 df_og: pd.DataFrame = load(SPLIT)
 print(len(df_og))
 print("   Done")
