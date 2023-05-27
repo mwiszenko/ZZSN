@@ -11,15 +11,20 @@ ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), ".."))
 DATA_DIR = os.path.join(ROOT_DIR, "data")
 OMNIGLOT_DATA_DIR = os.path.join(DATA_DIR, "omniglot", "data")
 OMNIGLOT_SPLITS_DIR = os.path.join(DATA_DIR, "omniglot", "splits")
+IMG_HEIGHT = 28
+IMG_WIDTH = 28
 
 
-def get_images(test, data_dir):
+def get_images(description, data_dir, height, width):
     images = []
-    alphabet, character, rot = test.split("/")
+    alphabet, character, rot = description.split("/")
     img_dir = os.path.join(data_dir, alphabet, character)
     class_images = sorted(glob.glob(os.path.join(img_dir, "*.png")))
     for i in class_images:
-        images.append(Image.open(i).rotate(float(rot[3:])))
+        img = Image.open(i)
+        rotated_img = img.rotate(float(rot[3:]))
+        scaled_img = rotated_img.resize(height, width)
+        images.append(scaled_img)
     return images
 
 
@@ -29,7 +34,9 @@ def load(split: str):
     df: pd.DataFrame = pd.read_csv(splits_file_path, names=["Path"])
     tqdm.pandas()
     df.progress_apply(
-        lambda row: images.extend(get_images(row["Path"], OMNIGLOT_DATA_DIR)),
+        lambda row: images.extend(
+            get_images(row["Path"], OMNIGLOT_DATA_DIR, IMG_HEIGHT, IMG_WIDTH)
+        ),
         axis=1,
     )
     return df
