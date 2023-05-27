@@ -13,6 +13,7 @@ OMNIGLOT_DATA_DIR = os.path.join(DATA_DIR, "omniglot", "data")
 OMNIGLOT_SPLITS_DIR = os.path.join(DATA_DIR, "omniglot", "splits")
 IMG_HEIGHT = 28
 IMG_WIDTH = 28
+SPLIT = "train"
 
 
 def get_images(description, data_dir, height, width):
@@ -23,7 +24,7 @@ def get_images(description, data_dir, height, width):
     for i in class_images:
         img = Image.open(i)
         rotated_img = img.rotate(float(rot[3:]))
-        scaled_img = rotated_img.resize(height, width)
+        scaled_img = rotated_img.resize((height, width))
         images.append(scaled_img)
     return images
 
@@ -43,6 +44,6 @@ def load(split: str):
 
 
 print("Loading dataset...")
-df_og: pd.DataFrame = load("train")
+df_og: pd.DataFrame = load(SPLIT)
 print(len(df_og))
 print("   Done")
