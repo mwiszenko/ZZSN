@@ -78,7 +78,9 @@ class ProtoNetwork(nn.Module):
 
 def get_conv_block(in_channels, out_channels):
     return nn.Sequential(
-        nn.Conv2d(in_channels, out_channels, kernel_size=KERNEL, padding=PADDING),
+        nn.Conv2d(
+            in_channels, out_channels, kernel_size=KERNEL, padding=PADDING
+        ),
         nn.BatchNorm2d(out_channels),
         nn.ReLU(),
         nn.MaxPool2d(POOLING),
