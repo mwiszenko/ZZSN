@@ -3,7 +3,7 @@ import argparse
 from zzsn.train import run_train
 
 
-class FunctionMapper:
+class ModeMapper:
     def __init__(self) -> None:
         pass
 
@@ -22,8 +22,6 @@ class FunctionMapper:
 
 
 def main():
-    fm = FunctionMapper()
-
     parser = argparse.ArgumentParser()
     modes = parser.add_subparsers(dest="command", required=True)
 
@@ -42,7 +40,7 @@ def main():
         choices=["euclidean"],
         default="euclidean",
     )
-    train.set_defaults(func=fm.train)
+    train.set_defaults(func=ModeMapper.train)
 
     args = parser.parse_args()
     args.func(args)

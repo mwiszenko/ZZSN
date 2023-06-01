@@ -11,7 +11,7 @@ from zzsn.base import (
     euclidean_dist,
 )
 from zzsn.constants import *
-from zzsn.network import ProtoNetwork, evaluate, train
+from zzsn.model import ProtoNetwork, evaluate, train
 
 DISTANCE_FUNC_MAPPER = {"euclidean": euclidean_dist}
 
@@ -46,9 +46,11 @@ def run_train(
         n_classes=len(ds_test), n_way=n_way, n_episodes=n_eval_episodes
     )
 
-    dl_train: DataLoader = create_data_loader(ds_train, "train", sampler_train)
-    dl_val: DataLoader = create_data_loader(ds_val, "val", sampler_val)
-    dl_test: DataLoader = create_data_loader(ds_test, "test", sampler_test)
+    dl_train: DataLoader = create_data_loader(
+        ds=ds_train, sampler=sampler_train
+    )
+    dl_val: DataLoader = create_data_loader(ds=ds_val, sampler=sampler_val)
+    dl_test: DataLoader = create_data_loader(ds=ds_test, sampler=sampler_test)
 
     np.random.seed(RANDOM_SEED)
     torch.manual_seed(RANDOM_SEED)

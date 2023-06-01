@@ -101,7 +101,6 @@ def transform_image(img, rot: str):
 
 
 def create_dataset(split: str, n_support: int, n_query: int):
-    print("Loading {} dataset...".format(split))
     ds: CustomImageDataset = CustomImageDataset(
         annotations_file=os.path.join(OMNIGLOT_SPLITS_DIR, split + ".txt"),
         n_support=n_support,
@@ -109,16 +108,13 @@ def create_dataset(split: str, n_support: int, n_query: int):
         data_dir=OMNIGLOT_DATA_DIR,
         transform=transform_image,
     )
-    print("   Done")
     return ds
 
 
-def create_data_loader(
-    ds: CustomImageDataset, split: str, sampler: BatchSampler
-):
-    print("Creating {} data loader...".format(split))
-    dl: DataLoader = DataLoader(ds, batch_sampler=sampler, num_workers=0)
-    print("   Done")
+def create_data_loader(ds: CustomImageDataset, sampler: BatchSampler):
+    dl: DataLoader = DataLoader(
+        dataset=ds, batch_sampler=sampler, num_workers=0
+    )
     return dl
 
 
