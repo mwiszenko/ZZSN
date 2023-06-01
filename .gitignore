@@ -144,4 +144,4 @@ dmypy.json
 data/omniglot/data
 
 # models
-best_model.bin
+*.bin
