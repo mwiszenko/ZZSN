@@ -49,7 +49,7 @@ class CustomImageDataset(Dataset):
 
     def __getitem__(self, idx: int):
         cl: str = self.classes[idx]
-        files: list = expand(cl, self.data_dir)
+        files: list = expand_class(cl, self.data_dir)
         images: list = [read_image(i) for i in files]
 
         if self.transform:
@@ -59,7 +59,7 @@ class CustomImageDataset(Dataset):
         return d
 
 
-def expand(label: str, data_dir: str):
+def expand_class(label: str, data_dir: str):
     alphabet, character, _ = label.split("/")
     img_dir: str = os.path.join(data_dir, alphabet, character)
     files: list[str] = sorted(glob(os.path.join(img_dir, "*.png")))
@@ -68,7 +68,7 @@ def expand(label: str, data_dir: str):
 
 def extract_episode(n_support, n_query, cl, images):
     n_examples = len(images)
-    images = [convert_tensor(i) for i in images]
+    images = [convert_to_tensor(i) for i in images]
 
     example_inds = random.sample(range(n_examples), n_support + n_query)
 
@@ -85,7 +85,7 @@ def extract_episode(n_support, n_query, cl, images):
     }
 
 
-def convert_tensor(x):
+def convert_to_tensor(x):
     x = 1.0 - torch.from_numpy(np.array(x, np.float32, copy=False)).transpose(
         0, 1
     ).contiguous().view(1, x.size[0], x.size[1])
@@ -100,31 +100,31 @@ def transform_image(img, rot: str):
     return img.rotate(float(rot[3:])).resize((X_DIM[1], X_DIM[2]))
 
 
-def create_dataset(split: str, n_support: int, n_query: int):
+def create_dataset(
+    split: str, n_support: int, n_query: int, transform: callable
+):
     ds: CustomImageDataset = CustomImageDataset(
         annotations_file=os.path.join(OMNIGLOT_SPLITS_DIR, split + ".txt"),
         n_support=n_support,
         n_query=n_query,
         data_dir=OMNIGLOT_DATA_DIR,
-        transform=transform_image,
+        transform=transform,
     )
     return ds
 
 
-def create_data_loader(ds: CustomImageDataset, sampler: BatchSampler):
-    dl: DataLoader = DataLoader(
-        dataset=ds, batch_sampler=sampler, num_workers=0
+def create_data_loader(
+    split: str,
+    n_support: int,
+    n_query: int,
+    n_way: int,
+    n_episodes: int,
+    transform=transform_image,
+):
+    ds: CustomImageDataset = create_dataset(
+        split=split, n_support=n_support, n_query=n_query, transform=transform
     )
-    return dl
-
-
-def euclidean_dist(x, y):
-    n = x.size(0)
-    m = y.size(0)
-    d = x.size(1)
-    assert d == y.size(1)
-
-    x = x.unsqueeze(1).expand(n, m, d)
-    y = y.unsqueeze(0).expand(n, m, d)
-
-    return torch.pow(x - y, 2).sum(2)
+    sampler: BatchSampler = BatchSampler(
+        n_classes=len(ds), n_way=n_way, n_episodes=n_episodes
+    )
+    return DataLoader(dataset=ds, batch_sampler=sampler, num_workers=0)

@@ -3,15 +3,10 @@ import torch
 from torch.optim import AdamW, lr_scheduler
 from torch.utils.data import DataLoader
 
-from zzsn.base import (
-    BatchSampler,
-    CustomImageDataset,
-    create_data_loader,
-    create_dataset,
-    euclidean_dist,
-)
 from zzsn.constants import *
+from zzsn.data import create_data_loader
 from zzsn.model import ProtoNetwork, evaluate, train
+from zzsn.utils import euclidean_dist
 
 DISTANCE_FUNC_MAPPER = {"euclidean": euclidean_dist}
 
@@ -26,31 +21,27 @@ def run_train(
     learning_rate: float,
     distance_func: str,
 ):
-    ds_train: CustomImageDataset = create_dataset(
-        "train", n_support=n_support, n_query=n_query
-    )
-    ds_val: CustomImageDataset = create_dataset(
-        "val", n_support=n_support, n_query=n_query
-    )
-    ds_test: CustomImageDataset = create_dataset(
-        "test", n_support=n_support, n_query=n_query
-    )
-
-    sampler_train: BatchSampler = BatchSampler(
-        n_classes=len(ds_train), n_way=n_way, n_episodes=n_train_episodes
-    )
-    sampler_val: BatchSampler = BatchSampler(
-        n_classes=len(ds_val), n_way=n_way, n_episodes=n_eval_episodes
-    )
-    sampler_test: BatchSampler = BatchSampler(
-        n_classes=len(ds_test), n_way=n_way, n_episodes=n_eval_episodes
-    )
-
     dl_train: DataLoader = create_data_loader(
-        ds=ds_train, sampler=sampler_train
+        split="train",
+        n_support=n_support,
+        n_query=n_query,
+        n_way=n_way,
+        n_episodes=n_train_episodes,
     )
-    dl_val: DataLoader = create_data_loader(ds=ds_val, sampler=sampler_val)
-    dl_test: DataLoader = create_data_loader(ds=ds_test, sampler=sampler_test)
+    dl_val: DataLoader = create_data_loader(
+        split="val",
+        n_support=n_support,
+        n_query=n_query,
+        n_way=n_way,
+        n_episodes=n_eval_episodes,
+    )
+    dl_test: DataLoader = create_data_loader(
+        split="test",
+        n_support=n_support,
+        n_query=n_query,
+        n_way=n_way,
+        n_episodes=n_eval_episodes,
+    )
 
     np.random.seed(RANDOM_SEED)
     torch.manual_seed(RANDOM_SEED)

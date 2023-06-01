@@ -5,12 +5,15 @@ from torch.nn.functional import log_softmax
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
+from zzsn.constants import *
+
 
 class Flatten(nn.Module):
     def __init__(self):
         super(Flatten, self).__init__()
 
-    def forward(self, x):
+    @staticmethod
+    def forward(x):
         return x.view(x.size(0), -1)
 
 
@@ -75,10 +78,10 @@ class ProtoNetwork(nn.Module):
 
 def get_conv_block(in_channels, out_channels):
     return nn.Sequential(
-        nn.Conv2d(in_channels, out_channels, kernel_size=(3, 3), padding=1),
+        nn.Conv2d(in_channels, out_channels, kernel_size=KERNEL, padding=PADDING),
         nn.BatchNorm2d(out_channels),
         nn.ReLU(),
-        nn.MaxPool2d(2),
+        nn.MaxPool2d(POOLING),
     )
 
 
