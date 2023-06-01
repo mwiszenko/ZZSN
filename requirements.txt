@@ -3,3 +3,4 @@ pandas
 Pillow
 tqdm
 torch
+scikit-learn
