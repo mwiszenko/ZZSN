@@ -97,7 +97,7 @@ def read_image(path: str):
 
 
 def transform_image(img, rot: str):
-    return img.rotate(float(rot[3:])).resize((IMG_HEIGHT, IMG_WIDTH))
+    return img.rotate(float(rot[3:])).resize((X_DIM[1], X_DIM[2]))
 
 
 def create_dataset(split: str, n_support: int, n_query: int):
