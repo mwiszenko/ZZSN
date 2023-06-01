@@ -13,6 +13,8 @@ from zzsn.base import (
 from zzsn.constants import *
 from zzsn.network import ProtoNetwork, evaluate, train
 
+DISTANCE_FUNC_MAPPER = {"euclidean": euclidean_dist}
+
 
 def run_train(
     epochs: int,
@@ -22,6 +24,7 @@ def run_train(
     n_train_episodes: int,
     n_eval_episodes: int,
     learning_rate: float,
+    distance_func: str,
 ):
     ds_train: CustomImageDataset = create_dataset(
         "train", n_support=n_support, n_query=n_query
@@ -51,7 +54,10 @@ def run_train(
     torch.manual_seed(RANDOM_SEED)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     custom_model: ProtoNetwork = ProtoNetwork(
-        x_dim=X_DIM, hid_dim=HID_DIM, z_dim=Z_DIM, dist=euclidean_dist
+        x_dim=X_DIM,
+        hid_dim=HID_DIM,
+        z_dim=Z_DIM,
+        dist=DISTANCE_FUNC_MAPPER.get(distance_func),
     ).to(device)
 
     optimizer = AdamW(custom_model.parameters(), lr=learning_rate)
