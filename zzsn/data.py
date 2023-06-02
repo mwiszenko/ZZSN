@@ -39,7 +39,6 @@ class CustomImageDataset(Dataset):
     ) -> None:
         split: pd.DataFrame = pd.read_csv(annotations_file, names=["class"])
         self.classes = split["class"].to_numpy()
-        print(type(self.classes))
         self.n_support: int = n_support
         self.n_query: int = n_query
         self.data_dir: str = data_dir
