@@ -1,5 +1,19 @@
 import argparse
+import subprocess
 
+from zzsn.constants import (
+    DEFAULT_DISTANCE_FUNC,
+    DEFAULT_DOWNLOAD_DATA,
+    DEFAULT_EPOCHS,
+    DEFAULT_LEARNING_RATE,
+    DEFAULT_N_EVAL_EPISODES,
+    DEFAULT_N_QUERY,
+    DEFAULT_N_SUPPORT,
+    DEFAULT_N_TRAIN_EPISODES,
+    DEFAULT_N_WAY,
+    DISTANCE_FUNCTIONS,
+    OMNIGLOT_SCRIPT_PATH,
+)
 from zzsn.train import run_train
 
 
@@ -9,6 +23,8 @@ class ModeMapper:
 
     @staticmethod
     def train(args):
+        if args.download_data:
+            subprocess.call(["sh", OMNIGLOT_SCRIPT_PATH])
         run_train(
             epochs=args.epochs,
             n_way=args.n_way,
@@ -25,22 +41,41 @@ def main():
     parser = argparse.ArgumentParser()
     modes = parser.add_subparsers(dest="command", required=True)
 
-    train = modes.add_parser("train")
-    train.add_argument("--epochs", "-e", type=int, default=5)
-    train.add_argument("--n_way", "-nw", type=int, default=5)
-    train.add_argument("--n_support", "-ns", type=int, default=5)
-    train.add_argument("--n_query", "-nq", type=int, default=5)
-    train.add_argument("--n_train_episodes", "-nte", type=int, default=100)
-    train.add_argument("--n_eval_episodes", "-nee", type=int, default=10)
-    train.add_argument("--learning_rate", "-lr", type=float, default=0.001)
-    train.add_argument(
+    train_mode = modes.add_parser("train")
+    train_mode.add_argument("--epochs", "-e", type=int, default=DEFAULT_EPOCHS)
+    train_mode.add_argument("--n_way", "-nw", type=int, default=DEFAULT_N_WAY)
+    train_mode.add_argument(
+        "--n_support", "-ns", type=int, default=DEFAULT_N_SUPPORT
+    )
+    train_mode.add_argument(
+        "--n_query", "-nq", type=int, default=DEFAULT_N_QUERY
+    )
+    train_mode.add_argument(
+        "--n_train_episodes",
+        "-nte",
+        type=int,
+        default=DEFAULT_N_TRAIN_EPISODES,
+    )
+    train_mode.add_argument(
+        "--n_eval_episodes", "-nee", type=int, default=DEFAULT_N_EVAL_EPISODES
+    )
+    train_mode.add_argument(
+        "--learning_rate", "-lr", type=float, default=DEFAULT_LEARNING_RATE
+    )
+    train_mode.add_argument(
         "--distance_func",
         "-dist",
         type=str,
-        choices=["euclidean"],
-        default="euclidean",
+        choices=DISTANCE_FUNCTIONS,
+        default=DEFAULT_DISTANCE_FUNC,
     )
-    train.set_defaults(func=ModeMapper.train)
+    train_mode.add_argument(
+        "--download_data",
+        "-dd",
+        type=bool,
+        default=DEFAULT_DOWNLOAD_DATA,
+    )
+    train_mode.set_defaults(func=ModeMapper.train)
 
     args = parser.parse_args()
     args.func(args)
