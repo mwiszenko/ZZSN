@@ -1,27 +1,28 @@
+import os
 import random
 from glob import glob
+from typing import Callable, Iterator, Optional, Union
 
 import numpy as np
 import pandas as pd
 import torch
 from PIL import Image
+from torch import Tensor
 from torch.utils.data import DataLoader, Dataset
 
-from zzsn.constants import *
-
-NAME = "zzsn"
+from zzsn.constants import OMNIGLOT_DATA_DIR, OMNIGLOT_SPLITS_DIR, X_DIM
 
 
 class BatchSampler(object):
-    def __init__(self, n_classes, n_way, n_episodes):
-        self.n_classes = n_classes
-        self.n_way = n_way
-        self.n_episodes = n_episodes
+    def __init__(self, n_classes: int, n_way: int, n_episodes: int) -> None:
+        self.n_classes: int = n_classes
+        self.n_way: int = n_way
+        self.n_episodes: int = n_episodes
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.n_episodes
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         for i in range(self.n_episodes):
             yield torch.randperm(self.n_classes)[: self.n_way]
 
@@ -33,50 +34,60 @@ class CustomImageDataset(Dataset):
         data_dir: str,
         n_support: int,
         n_query: int,
-        transform: callable = None,
-        target_transform: callable = None,
-    ):
+        transform: Optional[Callable] = None,
+        target_transform: Optional[Callable] = None,
+    ) -> None:
         split: pd.DataFrame = pd.read_csv(annotations_file, names=["class"])
         self.classes = split["class"].to_numpy()
-        self.n_support = n_support
-        self.n_query = n_query
+        print(type(self.classes))
+        self.n_support: int = n_support
+        self.n_query: int = n_query
         self.data_dir: str = data_dir
-        self.transform: callable = transform
-        self.target_transform: callable = target_transform
+        self.transform: Optional[Callable] = transform
+        self.target_transform: Optional[Callable] = target_transform
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.classes)
 
-    def __getitem__(self, idx: int):
+    def __getitem__(self, idx: int) -> dict[str, Union[str, Tensor]]:
         cl: str = self.classes[idx]
         files: list = expand_class(cl, self.data_dir)
         images: list = [read_image(i) for i in files]
 
         if self.transform:
+            rotation: str
             _, _, rotation = cl.split("/")
             images = [self.transform(i, rotation) for i in images]
-        d = extract_episode(self.n_support, self.n_query, cl, images)
+        d: dict[str, Union[str, Tensor]] = extract_episode(
+            self.n_support, self.n_query, cl, images
+        )
         return d
 
 
-def expand_class(label: str, data_dir: str):
+def expand_class(label: str, data_dir: str) -> list[str]:
+    alphabet: str
+    character: str
     alphabet, character, _ = label.split("/")
     img_dir: str = os.path.join(data_dir, alphabet, character)
     files: list[str] = sorted(glob(os.path.join(img_dir, "*.png")))
     return files
 
 
-def extract_episode(n_support, n_query, cl, images):
-    n_examples = len(images)
-    images = [convert_to_tensor(i) for i in images]
+def extract_episode(
+    n_support: int, n_query: int, cl: str, images: list[Image]
+) -> dict[str, Union[str, Tensor]]:
+    n_examples: int = len(images)
+    images_tensor: list[Tensor] = [convert_to_tensor(i) for i in images]
 
-    example_inds = random.sample(range(n_examples), n_support + n_query)
+    example_inds: list[int] = random.sample(
+        range(n_examples), n_support + n_query
+    )
 
-    support_inds = example_inds[:n_support]
-    query_inds = example_inds[n_support:]
+    support_inds: list[int] = example_inds[:n_support]
+    query_inds: list[int] = example_inds[n_support:]
 
-    xs = [images[i] for i in support_inds]
-    xq = [images[i] for i in query_inds]
+    xs: list[Tensor] = [images_tensor[i] for i in support_inds]
+    xq: list[Tensor] = [images_tensor[i] for i in query_inds]
 
     return {
         "class": cl,
@@ -85,24 +96,24 @@ def extract_episode(n_support, n_query, cl, images):
     }
 
 
-def convert_to_tensor(x):
-    x = 1.0 - torch.from_numpy(np.array(x, np.float32, copy=False)).transpose(
-        0, 1
-    ).contiguous().view(1, x.size[0], x.size[1])
-    return x
+def convert_to_tensor(x: Image) -> Tensor:
+    xt: Tensor = 1.0 - torch.from_numpy(
+        np.array(x, np.float32, copy=False)
+    ).transpose(0, 1).contiguous().view(1, x.size[0], x.size[1])
+    return xt
 
 
-def read_image(path: str):
+def read_image(path: str) -> Image:
     return Image.open(path)
 
 
-def transform_image(img, rot: str):
+def transform_image(img: Image, rot: str) -> Image:
     return img.rotate(float(rot[3:])).resize((X_DIM[1], X_DIM[2]))
 
 
 def create_dataset(
-    split: str, n_support: int, n_query: int, transform: callable
-):
+    split: str, n_support: int, n_query: int, transform: Callable
+) -> CustomImageDataset:
     ds: CustomImageDataset = CustomImageDataset(
         annotations_file=os.path.join(OMNIGLOT_SPLITS_DIR, split + ".txt"),
         n_support=n_support,
@@ -120,7 +131,7 @@ def create_data_loader(
     n_way: int,
     n_episodes: int,
     transform=transform_image,
-):
+) -> DataLoader:
     ds: CustomImageDataset = create_dataset(
         split=split, n_support=n_support, n_query=n_query, transform=transform
     )

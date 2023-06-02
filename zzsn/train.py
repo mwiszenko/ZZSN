@@ -3,7 +3,7 @@ import torch
 from torch.optim import AdamW, lr_scheduler
 from torch.utils.data import DataLoader
 
-from zzsn.constants import *
+from zzsn.constants import HID_DIM, RANDOM_SEED, X_DIM, Z_DIM
 from zzsn.data import create_data_loader
 from zzsn.model import ProtoNetwork, evaluate, train
 from zzsn.utils import euclidean_dist
@@ -20,7 +20,7 @@ def run_train(
     n_eval_episodes: int,
     learning_rate: float,
     distance_func: str,
-):
+) -> None:
     dl_train: DataLoader = create_data_loader(
         split="train",
         n_support=n_support,
@@ -45,18 +45,20 @@ def run_train(
 
     np.random.seed(RANDOM_SEED)
     torch.manual_seed(RANDOM_SEED)
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     custom_model: ProtoNetwork = ProtoNetwork(
         x_dim=X_DIM,
         hid_dim=HID_DIM,
         z_dim=Z_DIM,
-        dist=DISTANCE_FUNC_MAPPER.get(distance_func),
+        dist=DISTANCE_FUNC_MAPPER.get(distance_func, euclidean_dist),
     ).to(device)
 
     optimizer = AdamW(custom_model.parameters(), lr=learning_rate)
     scheduler = lr_scheduler.StepLR(optimizer, 1, gamma=0.5)
 
     best_acc: float = 0
+    epoch_i: int
 
     for epoch_i in range(epochs):
         print("")
@@ -64,6 +66,8 @@ def run_train(
 
         print("Training...")
 
+        train_acc: float
+        train_loss: float
         train_acc, train_loss = train(
             model=custom_model,
             data_loader=dl_train,
@@ -76,6 +80,8 @@ def run_train(
 
         print("Running validation...")
 
+        val_acc: float
+        val_loss: float
         val_acc, val_loss = evaluate(model=custom_model, data_loader=dl_val)
 
         print("  Validation accuracy: {0:.2f}".format(val_acc))
@@ -89,6 +95,7 @@ def run_train(
     # check model accuracy on test data
     print("Running test...")
 
+    test_acc: float
     test_acc, _ = evaluate(model=custom_model, data_loader=dl_test)
 
     print("  Test accuracy: {0:.2f}".format(test_acc))

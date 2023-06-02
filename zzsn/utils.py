@@ -1,10 +1,10 @@
 import torch
 
 
-def euclidean_dist(x, y):
-    n = x.size(0)
-    m = y.size(0)
-    d = x.size(1)
+def euclidean_dist(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
+    n: int = x.size(0)
+    m: int = y.size(0)
+    d: int = x.size(1)
     assert d == y.size(1)
 
     x = x.unsqueeze(1).expand(n, m, d)
