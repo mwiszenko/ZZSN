@@ -1,23 +1,9 @@
 
-# zzsn
+# ZZSN
 
-Awesome zzsn created by mwiszenko
-
-## Install it from PyPI
-
-```bash
-pip install zzsn
-```
+Prototypical network for few-shot classification.
 
 ## Usage
-
-```py
-from zzsn import BaseClass
-from zzsn import base_function
-
-BaseClass().base_method()
-base_function()
-```
 
 ```bash
 $ python -m zzsn
