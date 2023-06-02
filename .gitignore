@@ -135,3 +135,13 @@ dmypy.json
 
 # templates
 .github/templates/*
+
+# JetBrains
+.idea/workspace.xml
+.idea/libraries
+
+# data
+data/omniglot/data
+
+# models
+*.bin

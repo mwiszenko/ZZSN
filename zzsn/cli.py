@@ -1,28 +1,50 @@
-"""CLI interface for zzsn project.
+import argparse
 
-Be creative! do whatever you want!
-
-- Install click or typer and create a CLI app
-- Use builtin argparse
-- Start a web application
-- Import things from your .base module
-"""
+from zzsn.train import run_train
 
 
-def main():  # pragma: no cover
-    """
-    The main function executes on commands:
-    `python -m zzsn` and `$ zzsn `.
+class ModeMapper:
+    def __init__(self) -> None:
+        pass
 
-    This is your program's entry point.
+    @staticmethod
+    def train(args):
+        run_train(
+            epochs=args.epochs,
+            n_way=args.n_way,
+            n_support=args.n_support,
+            n_query=args.n_query,
+            n_train_episodes=args.n_train_episodes,
+            n_eval_episodes=args.n_eval_episodes,
+            learning_rate=args.learning_rate,
+            distance_func=args.distance_func,
+        )
 
-    You can change this function to do whatever you want.
-    Examples:
-        * Run a test suite
-        * Run a server
-        * Do some other stuff
-        * Run a command line application (Click, Typer, ArgParse)
-        * List all available tasks
-        * Run an application (Flask, FastAPI, Django, etc.)
-    """
-    print("This will do something")
+
+def main():
+    parser = argparse.ArgumentParser()
+    modes = parser.add_subparsers(dest="command", required=True)
+
+    train = modes.add_parser("train")
+    train.add_argument("--epochs", "-e", type=int, default=5)
+    train.add_argument("--n_way", "-nw", type=int, default=5)
+    train.add_argument("--n_support", "-ns", type=int, default=5)
+    train.add_argument("--n_query", "-nq", type=int, default=5)
+    train.add_argument("--n_train_episodes", "-nte", type=int, default=100)
+    train.add_argument("--n_eval_episodes", "-nee", type=int, default=10)
+    train.add_argument("--learning_rate", "-lr", type=float, default=0.001)
+    train.add_argument(
+        "--distance_func",
+        "-dist",
+        type=str,
+        choices=["euclidean"],
+        default="euclidean",
+    )
+    train.set_defaults(func=ModeMapper.train)
+
+    args = parser.parse_args()
+    args.func(args)
+
+
+if __name__ == "__main__":
+    main()
