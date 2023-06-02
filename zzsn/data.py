@@ -10,7 +10,7 @@ from PIL import Image
 from torch import Tensor
 from torch.utils.data import DataLoader, Dataset
 
-from zzsn.constants import OMNIGLOT_DATA_DIR, OMNIGLOT_SPLITS_DIR, X_DIM
+from zzsn.constants import DATASET_DIR, SPLITS_DIR, X_DIM
 
 
 class BatchSampler(object):
@@ -115,10 +115,10 @@ def create_dataset(
     split: str, n_support: int, n_query: int, transform: Callable
 ) -> CustomImageDataset:
     ds: CustomImageDataset = CustomImageDataset(
-        annotations_file=os.path.join(OMNIGLOT_SPLITS_DIR, split + ".txt"),
+        annotations_file=os.path.join(SPLITS_DIR, split + ".txt"),
         n_support=n_support,
         n_query=n_query,
-        data_dir=OMNIGLOT_DATA_DIR,
+        data_dir=DATASET_DIR,
         transform=transform,
     )
     return ds
