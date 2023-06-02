@@ -1,7 +1,9 @@
 import argparse
+import subprocess
 
 from zzsn.constants import (
     DEFAULT_DISTANCE_FUNC,
+    DEFAULT_DOWNLOAD_DATA,
     DEFAULT_EPOCHS,
     DEFAULT_LEARNING_RATE,
     DEFAULT_N_EVAL_EPISODES,
@@ -10,6 +12,7 @@ from zzsn.constants import (
     DEFAULT_N_TRAIN_EPISODES,
     DEFAULT_N_WAY,
     DISTANCE_FUNCTIONS,
+    OMNIGLOT_SCRIPT_PATH,
 )
 from zzsn.train import run_train
 
@@ -20,6 +23,8 @@ class ModeMapper:
 
     @staticmethod
     def train(args):
+        if args.download_data:
+            subprocess.call(["sh", OMNIGLOT_SCRIPT_PATH])
         run_train(
             epochs=args.epochs,
             n_way=args.n_way,
@@ -63,6 +68,12 @@ def main():
         type=str,
         choices=DISTANCE_FUNCTIONS,
         default=DEFAULT_DISTANCE_FUNC,
+    )
+    train_mode.add_argument(
+        "--download_data",
+        "-dd",
+        type=bool,
+        default=DEFAULT_DOWNLOAD_DATA,
     )
     train_mode.set_defaults(func=ModeMapper.train)
 
