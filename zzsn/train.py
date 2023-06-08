@@ -3,9 +3,9 @@ import torch
 from torch.optim import AdamW, lr_scheduler
 from torch.utils.data import DataLoader
 
-from zzsn.constants import HID_DIM, RANDOM_SEED, X_DIM, Z_DIM, OMNIGOT, MINIIMAGENET
-# from zzsn.omnigot_data import create_data_loader
-import zzsn.omnigot_data as omnigot
+from zzsn.constants import HID_DIM, RANDOM_SEED, X_DIM, Z_DIM, OMNIGLOT, MINIIMAGENET
+
+import zzsn.omniglot_data as omniglot
 import zzsn.miniimagenet_data as mimagenet
 from zzsn.model import ProtoNetwork, evaluate, train
 from zzsn.utils import euclidean_dist
@@ -27,8 +27,8 @@ def run_train(
     
     if dataset == MINIIMAGENET:
         create_data_loader = mimagenet.create_data_loader
-    elif dataset == OMNIGOT:
-        create_data_loader = omnigot.create_data_loader
+    elif dataset == OMNIGLOT:
+        create_data_loader = omniglot.create_data_loader
     else:
         exit(-1)
 

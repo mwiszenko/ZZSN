@@ -10,7 +10,7 @@ from PIL import Image
 from torch import Tensor
 from torch.utils.data import DataLoader, Dataset
 
-from zzsn.constants import DATASET_DIR, SPLITS_DIR, X_DIM, OMNIGOT
+from zzsn.constants import DATASET_DIR, SPLITS_DIR, X_DIM, OMNIGLOT
 
 
 class BatchSampler(object):
@@ -107,7 +107,7 @@ def read_image(path: str) -> Image:
 
 
 def transform_image(img: Image, rot: str) -> Image:
-    return img.rotate(float(rot[3:])).resize((X_DIM[OMNIGOT][1], X_DIM[OMNIGOT][2]))
+    return img.rotate(float(rot[3:])).resize((X_DIM[OMNIGLOT][1], X_DIM[OMNIGLOT][2]))
 
 
 def create_dataset(

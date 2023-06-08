@@ -15,7 +15,7 @@ from zzsn.constants import (
     OMNIGLOT_SCRIPT_PATH,
     MINIIMAGENET_SCRIPT_PATH,
     DEFAULT_DATASET,
-    OMNIGOT,
+    OMNIGLOT,
     MINIIMAGENET,
     DATASETS,
 )
@@ -29,7 +29,7 @@ class ModeMapper:
     @staticmethod
     def train(args):
         if args.download_data:
-            if args.dataset == OMNIGOT:
+            if args.dataset == OMNIGLOT:
                 subprocess.call(["sh", OMNIGLOT_SCRIPT_PATH])
             elif args.dataset == MINIIMAGENET:
                 subprocess.call(["sh", MINIIMAGENET_SCRIPT_PATH])
