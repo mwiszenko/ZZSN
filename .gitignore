@@ -142,6 +142,7 @@ dmypy.json
 
 # data
 data/omniglot/data
+data/miniImageNet/data
 
 # models
 *.bin

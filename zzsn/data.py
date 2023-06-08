@@ -39,6 +39,7 @@ class CustomImageDataset(Dataset):
     ) -> None:
         split: pd.DataFrame = pd.read_csv(annotations_file, names=["class"])
         self.classes = split["class"].to_numpy()
+        # print(type(self.classes))
         self.n_support: int = n_support
         self.n_query: int = n_query
         self.data_dir: str = data_dir
@@ -96,9 +97,11 @@ def extract_episode(
 
 
 def convert_to_tensor(x: Image) -> Tensor:
+    print("x: ",np.array(x, np.float32, copy=False))
     xt: Tensor = 1.0 - torch.from_numpy(
         np.array(x, np.float32, copy=False)
     ).transpose(0, 1).contiguous().view(1, x.size[0], x.size[1])
+    print('xt.shape ', xt[0])
     return xt
 
 
@@ -115,9 +118,9 @@ def create_dataset(
 ) -> CustomImageDataset:
     ds: CustomImageDataset = CustomImageDataset(
         annotations_file=os.path.join(SPLITS_DIR, split + ".txt"),
+        data_dir=DATASET_DIR,
         n_support=n_support,
         n_query=n_query,
-        data_dir=DATASET_DIR,
         transform=transform,
     )
     return ds

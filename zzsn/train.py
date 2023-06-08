@@ -5,6 +5,7 @@ from torch.utils.data import DataLoader
 
 from zzsn.constants import HID_DIM, RANDOM_SEED, X_DIM, Z_DIM
 from zzsn.data import create_data_loader
+from zzsn.data_miniimagenet import create_data_loader_miniimage
 from zzsn.model import ProtoNetwork, evaluate, train
 from zzsn.utils import euclidean_dist
 
@@ -21,27 +22,51 @@ def run_train(
     learning_rate: float,
     distance_func: str,
 ) -> None:
-    dl_train: DataLoader = create_data_loader(
+    
+    dl_train: DataLoader = create_data_loader_miniimage(
         split="train",
         n_support=n_support,
         n_query=n_query,
         n_way=n_way,
         n_episodes=n_train_episodes,
     )
-    dl_val: DataLoader = create_data_loader(
+    dl_val: DataLoader = create_data_loader_miniimage(
         split="val",
         n_support=n_support,
         n_query=n_query,
         n_way=n_way,
         n_episodes=n_eval_episodes,
     )
-    dl_test: DataLoader = create_data_loader(
+    dl_test: DataLoader = create_data_loader_miniimage(
         split="test",
         n_support=n_support,
         n_query=n_query,
         n_way=n_way,
         n_episodes=n_eval_episodes,
     )
+
+    # dl_train: DataLoader = create_data_loader(
+    #     split="train",
+    #     n_support=n_support,
+    #     n_query=n_query,
+    #     n_way=n_way,
+    #     n_episodes=n_train_episodes,
+    # )
+    # dl_val: DataLoader = create_data_loader(
+    #     split="val",
+    #     n_support=n_support,
+    #     n_query=n_query,
+    #     n_way=n_way,
+    #     n_episodes=n_eval_episodes,
+    # )
+    # dl_test: DataLoader = create_data_loader(
+    #     split="test",
+    #     n_support=n_support,
+    #     n_query=n_query,
+    #     n_way=n_way,
+    #     n_episodes=n_eval_episodes,
+    # )
+
 
     np.random.seed(RANDOM_SEED)
     torch.manual_seed(RANDOM_SEED)
