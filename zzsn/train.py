@@ -3,9 +3,10 @@ import torch
 from torch.optim import AdamW, lr_scheduler
 from torch.utils.data import DataLoader
 
-from zzsn.constants import HID_DIM, RANDOM_SEED, X_DIM, Z_DIM
-from zzsn.data import create_data_loader
-from zzsn.data_miniimagenet import create_data_loader_miniimage
+from zzsn.constants import HID_DIM, RANDOM_SEED, X_DIM, Z_DIM, OMNIGOT, MINIIMAGENET
+# from zzsn.omnigot_data import create_data_loader
+import zzsn.omnigot_data as omnigot
+import zzsn.miniimagenet_data as mimagenet
 from zzsn.model import ProtoNetwork, evaluate, train
 from zzsn.utils import euclidean_dist
 
@@ -21,23 +22,31 @@ def run_train(
     n_eval_episodes: int,
     learning_rate: float,
     distance_func: str,
+    dataset: str,
 ) -> None:
     
-    dl_train: DataLoader = create_data_loader_miniimage(
+    if dataset == MINIIMAGENET:
+        create_data_loader = mimagenet.create_data_loader
+    elif dataset == OMNIGOT:
+        create_data_loader = omnigot.create_data_loader
+    else:
+        exit(-1)
+
+    dl_train: DataLoader = create_data_loader(
         split="train",
         n_support=n_support,
         n_query=n_query,
         n_way=n_way,
         n_episodes=n_train_episodes,
     )
-    dl_val: DataLoader = create_data_loader_miniimage(
+    dl_val: DataLoader = create_data_loader(
         split="val",
         n_support=n_support,
         n_query=n_query,
         n_way=n_way,
         n_episodes=n_eval_episodes,
     )
-    dl_test: DataLoader = create_data_loader_miniimage(
+    dl_test: DataLoader = create_data_loader(
         split="test",
         n_support=n_support,
         n_query=n_query,
@@ -45,37 +54,14 @@ def run_train(
         n_episodes=n_eval_episodes,
     )
 
-    # dl_train: DataLoader = create_data_loader(
-    #     split="train",
-    #     n_support=n_support,
-    #     n_query=n_query,
-    #     n_way=n_way,
-    #     n_episodes=n_train_episodes,
-    # )
-    # dl_val: DataLoader = create_data_loader(
-    #     split="val",
-    #     n_support=n_support,
-    #     n_query=n_query,
-    #     n_way=n_way,
-    #     n_episodes=n_eval_episodes,
-    # )
-    # dl_test: DataLoader = create_data_loader(
-    #     split="test",
-    #     n_support=n_support,
-    #     n_query=n_query,
-    #     n_way=n_way,
-    #     n_episodes=n_eval_episodes,
-    # )
-
-
     np.random.seed(RANDOM_SEED)
     torch.manual_seed(RANDOM_SEED)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     custom_model: ProtoNetwork = ProtoNetwork(
-        x_dim=X_DIM,
-        hid_dim=HID_DIM,
-        z_dim=Z_DIM,
+        x_dim=X_DIM[dataset],
+        hid_dim=HID_DIM[dataset],
+        z_dim=Z_DIM[dataset],
         dist=DISTANCE_FUNC_MAPPER.get(distance_func, euclidean_dist),
     ).to(device)
 

@@ -8,7 +8,12 @@ DATA_DIR = os.path.join(ROOT_DIR, "data")
 DATASET_DIR = os.path.join(DATA_DIR, "omniglot", "data")
 SPLITS_DIR = os.path.join(DATA_DIR, "omniglot", "splits")
 OMNIGLOT_SCRIPT_PATH = os.path.join(ROOT_DIR, "download_omniglot.sh")
+MINIIMAGENET_SCRIPT_PATH = os.path.join(ROOT_DIR, "download_miniimagenet.sh")
+OMNIGOT = "OMNIGOT"
+MINIIMAGENET = "MINIIMAGENET"
+DATASETS = [OMNIGOT, MINIIMAGENET]
 
+# miniimagenet metadata
 MINIIMAGENET_DIR = os.path.join(DATA_DIR, "miniImageNet", "data")
 MINIIMAGENET_SPLITS_DIR = os.path.join(DATA_DIR, "miniImageNet", "splits")
 MINIIMAGENET_CLASSES = 100
@@ -18,19 +23,28 @@ MINIIMAGENET_TESTCL = 20
 MINIIMAGENET_SAMPLES_PER_CLASS = 600
 MINIIMAGENET_IMG_SHAPE = [84, 84, 3]
 
+
 # model
-X_DIM = (3, 84, 84)
-HID_DIM = 64
-Z_DIM = 1600
+X_DIM: dict = {}
+HID_DIM: dict = {}
+Z_DIM: dict = {}
+
+# miniimagenet
+X_DIM[MINIIMAGENET] = (3, 84, 84)
+HID_DIM[MINIIMAGENET] = 64
+Z_DIM[MINIIMAGENET] = 1600
+
+# omnigot
+X_DIM[OMNIGOT] = (1, 28, 28)
+HID_DIM[OMNIGOT] = 64
+Z_DIM[OMNIGOT] = 64
 
 
-# X_DIM = (1, 28, 28)
-# HID_DIM = 64
-# Z_DIM = 64
 KERNEL = (3, 3)
 PADDING = 1
 POOLING = (2, 2)
 DISTANCE_FUNCTIONS = ["euclidean"]
+
 
 # training
 DEFAULT_EPOCHS = 5
@@ -42,3 +56,4 @@ DEFAULT_N_EVAL_EPISODES = 10
 DEFAULT_LEARNING_RATE = 0.001
 DEFAULT_DISTANCE_FUNC = DISTANCE_FUNCTIONS[0]
 DEFAULT_DOWNLOAD_DATA = False
+DEFAULT_DATASET = OMNIGOT

@@ -13,6 +13,11 @@ from zzsn.constants import (
     DEFAULT_N_WAY,
     DISTANCE_FUNCTIONS,
     OMNIGLOT_SCRIPT_PATH,
+    MINIIMAGENET_SCRIPT_PATH,
+    DEFAULT_DATASET,
+    OMNIGOT,
+    MINIIMAGENET,
+    DATASETS,
 )
 from zzsn.train import run_train
 
@@ -24,7 +29,10 @@ class ModeMapper:
     @staticmethod
     def train(args):
         if args.download_data:
-            subprocess.call(["sh", OMNIGLOT_SCRIPT_PATH])
+            if args.dataset == OMNIGOT:
+                subprocess.call(["sh", OMNIGLOT_SCRIPT_PATH])
+            elif args.dataset == MINIIMAGENET:
+                subprocess.call(["sh", MINIIMAGENET_SCRIPT_PATH])
         run_train(
             epochs=args.epochs,
             n_way=args.n_way,
@@ -34,6 +42,7 @@ class ModeMapper:
             n_eval_episodes=args.n_eval_episodes,
             learning_rate=args.learning_rate,
             distance_func=args.distance_func,
+            dataset=args.dataset,
         )
 
 
@@ -74,6 +83,13 @@ def main():
         "-dd",
         type=bool,
         default=DEFAULT_DOWNLOAD_DATA,
+    )
+    train_mode.add_argument(
+        "--dataset",
+        "-ds",
+        type=str,
+        choices=DATASETS,
+        default=DEFAULT_DATASET,
     )
     train_mode.set_defaults(func=ModeMapper.train)
 
