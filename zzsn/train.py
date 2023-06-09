@@ -2,12 +2,13 @@ import numpy as np
 import torch
 from torch.optim import AdamW, lr_scheduler
 from torch.utils.data import DataLoader
+import os
 
-from zzsn.constants import HID_DIM, RANDOM_SEED, X_DIM, Z_DIM, OMNIGLOT, MINIIMAGENET
+from zzsn.constants import HID_DIM, RANDOM_SEED, X_DIM, Z_DIM, OMNIGLOT, MINIIMAGENET, MODELS_PATH
 
 import zzsn.omniglot_data as omniglot
 import zzsn.miniimagenet_data as mimagenet
-from zzsn.model import ProtoNetwork, evaluate, train
+from zzsn.model import ProtoNetwork, evaluate, train, get_model_name
 from zzsn.utils import euclidean_dist
 
 DISTANCE_FUNC_MAPPER = {"euclidean": euclidean_dist}
@@ -101,7 +102,7 @@ def run_train(
         # save model state with best accuracy
         if val_acc > best_acc:
             best_acc = val_acc
-            torch.save(custom_model.state_dict(), "best_model.bin")
+            torch.save(custom_model.state_dict(), os.path.join(MODELS_PATH, get_model_name(dataset, n_way, n_support, n_query, n_eval_episodes)) + ".bin" )
 
     # check model accuracy on test data
     print("Running test...")

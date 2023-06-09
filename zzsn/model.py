@@ -92,6 +92,9 @@ class ProtoNetwork(nn.Module):
 
         return loss_val, {"loss": loss_val.item(), "acc": acc_val.item()}
 
+def get_model_name(dataset, n_way, n_support, n_query, n_episodes):
+    return dataset[:3] + "w" + str(n_way) + "s" + str(n_support) + "q" + str(n_query) + "e" + str(n_episodes)
+    
 
 def get_conv_block(in_channels: int, out_channels: int):
     return nn.Sequential(
