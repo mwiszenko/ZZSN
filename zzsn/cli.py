@@ -49,7 +49,6 @@ class ModeMapper:
 
     @staticmethod
     def test(args):
-        print("TEST")
         model = args.model[:-4] if args.model[-4:] == ".bin" else args.model
         run_test(
             model=model,

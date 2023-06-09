@@ -102,7 +102,7 @@ def run_train(
         # save model state with best accuracy
         if val_acc > best_acc:
             best_acc = val_acc
-            torch.save(custom_model.state_dict(), os.path.join(MODELS_PATH, get_model_name(dataset, n_way, n_support, n_query, n_eval_episodes)) + ".bin" )
+            torch.save(custom_model.state_dict(), os.path.join(MODELS_PATH, get_model_name(dataset, n_way, n_support, n_query, n_train_episodes)) + ".bin" )
 
     # check model accuracy on test data
     print("Running test...")
