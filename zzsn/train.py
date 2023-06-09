@@ -9,9 +9,9 @@ from zzsn.constants import HID_DIM, RANDOM_SEED, X_DIM, Z_DIM, OMNIGLOT, MINIIMA
 import zzsn.omniglot_data as omniglot
 import zzsn.miniimagenet_data as mimagenet
 from zzsn.model import ProtoNetwork, evaluate, train, get_model_name
-from zzsn.utils import euclidean_dist
+from zzsn.utils import euclidean_dist, cosine_dist
 
-DISTANCE_FUNC_MAPPER = {"euclidean": euclidean_dist}
+DISTANCE_FUNC_MAPPER = {"euclidean": euclidean_dist, "cosine": cosine_dist}
 
 
 def run_train(

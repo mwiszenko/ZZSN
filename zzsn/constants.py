@@ -44,7 +44,7 @@ Z_DIM[OMNIGLOT] = 64
 KERNEL = (3, 3)
 PADDING = 1
 POOLING = (2, 2)
-DISTANCE_FUNCTIONS = ["euclidean"]
+DISTANCE_FUNCTIONS = ["euclidean", "cosine"]
 
 
 # training
