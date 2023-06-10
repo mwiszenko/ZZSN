@@ -7,7 +7,6 @@ from zzsn.constants import (
     DEFAULT_DISTANCE_FUNC,
     DEFAULT_EPOCHS,
     DEFAULT_LEARNING_RATE,
-    DEFAULT_MODEL,
     DEFAULT_N_EVAL_EPISODES,
     DEFAULT_N_QUERY,
     DEFAULT_N_SUPPORT,
@@ -118,7 +117,7 @@ def main():
         "--model",
         "-m",
         type=str,
-        default=DEFAULT_MODEL,
+        required=True,
     )
     test_mode.add_argument(
         "--dataset",
