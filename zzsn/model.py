@@ -43,7 +43,7 @@ class ProtoNetwork(nn.Module):
         xs: Tensor = sample["xs"]  # support
         xq: Tensor = sample["xq"]  # query
 
-        if torch.cuda.is_available:
+        if torch.cuda.is_available():
             xs = xs.cuda()
             xq = xq.cuda()
 
