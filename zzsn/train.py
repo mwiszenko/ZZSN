@@ -1,15 +1,23 @@
+import os
+
 import numpy as np
 import torch
 from torch.optim import AdamW, lr_scheduler
 from torch.utils.data import DataLoader
-import os
 
-from zzsn.constants import HID_DIM, RANDOM_SEED, X_DIM, Z_DIM, OMNIGLOT, MINIIMAGENET, MODELS_PATH
-
-import zzsn.omniglot_data as omniglot
 import zzsn.miniimagenet_data as mimagenet
-from zzsn.model import ProtoNetwork, evaluate, train, get_model_name
-from zzsn.utils import euclidean_dist, cosine_dist
+import zzsn.omniglot_data as omniglot
+from zzsn.constants import (
+    HID_DIM,
+    MINIIMAGENET,
+    MODELS_PATH,
+    OMNIGLOT,
+    RANDOM_SEED,
+    X_DIM,
+    Z_DIM,
+)
+from zzsn.model import ProtoNetwork, evaluate, get_model_name, train
+from zzsn.utils import cosine_dist, euclidean_dist
 
 DISTANCE_FUNC_MAPPER = {"euclidean": euclidean_dist, "cosine": cosine_dist}
 
@@ -25,7 +33,6 @@ def run_train(
     distance_func: str,
     dataset: str,
 ) -> None:
-    
     if dataset == MINIIMAGENET:
         create_data_loader = mimagenet.create_data_loader
     elif dataset == OMNIGLOT:
@@ -102,7 +109,16 @@ def run_train(
         # save model state with best accuracy
         if val_acc > best_acc:
             best_acc = val_acc
-            torch.save(custom_model.state_dict(), os.path.join(MODELS_PATH, get_model_name(dataset, n_way, n_support, n_query, n_train_episodes)) + ".bin" )
+            torch.save(
+                custom_model.state_dict(),
+                os.path.join(
+                    MODELS_PATH,
+                    get_model_name(
+                        dataset, n_way, n_support, n_query, n_train_episodes
+                    ),
+                )
+                + ".bin",
+            )
 
     # check model accuracy on test data
     print("Running test...")
