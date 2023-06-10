@@ -13,6 +13,7 @@ from zzsn.constants import (
     DEFAULT_N_TRAIN_EPISODES,
     DEFAULT_N_WAY,
     DISTANCE_FUNCTIONS,
+    DEFAULT_TEST_RESULT_FILE,
     MINIIMAGENET,
     MINIIMAGENET_SCRIPT_PATH,
     OMNIGLOT,
@@ -56,6 +57,7 @@ class ModeMapper:
             n_query=args.n_query,
             n_eval_episodes=args.n_eval_episodes,
             distance_func=args.distance_func,
+            output_file=args.output_file,
         )
 
     @staticmethod
@@ -142,6 +144,12 @@ def main():
         type=str,
         choices=DISTANCE_FUNCTIONS,
         default=DEFAULT_DISTANCE_FUNC,
+    )
+    test_mode.add_argument(
+        "--output_file",
+        "-out",
+        type=str,
+        default=DEFAULT_TEST_RESULT_FILE,
     )
     test_mode.set_defaults(func=ModeMapper.test)
 

@@ -14,7 +14,7 @@ from zzsn.constants import (
     OMNIGLOT,
     RANDOM_SEED,
     TEST_ITERATIONS,
-    TEST_RESULT_FILE,
+    DEFAULT_TEST_RESULT_FILE,
     X_DIM,
     Z_DIM,
 )
@@ -32,6 +32,7 @@ def run_test(
     n_query: int,
     n_eval_episodes: int,
     distance_func: str,
+    output_file: str,
 ) -> None:
     checkpoint = torch.load(
         os.path.join(MODELS_PATH, model + ".bin"), map_location="cpu"
@@ -74,7 +75,7 @@ def run_test(
 
     print("  Test accuracy: {0:.2f}".format(avg_acc))
 
-    with open(TEST_RESULT_FILE, "+a") as fd:
+    with open(output_file, "+a") as fd:
         elements_to_save = [
             model,
             str(n_way),
