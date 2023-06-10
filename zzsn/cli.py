@@ -2,8 +2,9 @@ import argparse
 import subprocess
 
 from zzsn.constants import (
+    DATASETS,
+    DEFAULT_DATASET,
     DEFAULT_DISTANCE_FUNC,
-    DEFAULT_DOWNLOAD_DATA,
     DEFAULT_EPOCHS,
     DEFAULT_LEARNING_RATE,
     DEFAULT_N_EVAL_EPISODES,
@@ -11,17 +12,15 @@ from zzsn.constants import (
     DEFAULT_N_SUPPORT,
     DEFAULT_N_TRAIN_EPISODES,
     DEFAULT_N_WAY,
-    DEFAULT_MODEL,
+    DEFAULT_TEST_RESULT_FILE,
     DISTANCE_FUNCTIONS,
-    OMNIGLOT_SCRIPT_PATH,
-    MINIIMAGENET_SCRIPT_PATH,
-    DEFAULT_DATASET,
-    OMNIGLOT,
     MINIIMAGENET,
-    DATASETS,
+    MINIIMAGENET_SCRIPT_PATH,
+    OMNIGLOT,
+    OMNIGLOT_SCRIPT_PATH,
 )
-from zzsn.train import run_train
 from zzsn.test import run_test
+from zzsn.train import run_train
 
 
 class ModeMapper:
@@ -58,6 +57,7 @@ class ModeMapper:
             n_query=args.n_query,
             n_eval_episodes=args.n_eval_episodes,
             distance_func=args.distance_func,
+            output_file=args.output_file,
         )
 
     @staticmethod
@@ -99,12 +99,7 @@ def main():
         choices=DISTANCE_FUNCTIONS,
         default=DEFAULT_DISTANCE_FUNC,
     )
-    train_mode.add_argument(
-        "--download_data",
-        "-dd",
-        type=bool,
-        default=DEFAULT_DOWNLOAD_DATA,
-    )
+    train_mode.add_argument("--download_data", "-dd", action="store_true")
     train_mode.add_argument(
         "--dataset",
         "-ds",
@@ -120,7 +115,7 @@ def main():
         "--model",
         "-m",
         type=str,
-        default=DEFAULT_MODEL,
+        required=True,
     )
     test_mode.add_argument(
         "--dataset",
@@ -129,29 +124,15 @@ def main():
         choices=DATASETS,
         default=DEFAULT_DATASET,
     )
+    test_mode.add_argument("--n_way", "-nw", type=int, default=DEFAULT_N_WAY)
     test_mode.add_argument(
-        "--n_way", 
-        "-nw", 
-        type=int, 
-        default=DEFAULT_N_WAY
+        "--n_support", "-ns", type=int, default=DEFAULT_N_SUPPORT
     )
     test_mode.add_argument(
-        "--n_support", 
-        "-ns", 
-        type=int, 
-        default=DEFAULT_N_SUPPORT
+        "--n_query", "-nq", type=int, default=DEFAULT_N_QUERY
     )
     test_mode.add_argument(
-        "--n_query", 
-        "-nq", 
-        type=int, 
-        default=DEFAULT_N_QUERY
-    )
-    test_mode.add_argument(
-        "--n_eval_episodes", 
-        "-nee", 
-        type=int, 
-        default=DEFAULT_N_EVAL_EPISODES
+        "--n_eval_episodes", "-nee", type=int, default=DEFAULT_N_EVAL_EPISODES
     )
     test_mode.add_argument(
         "--distance_func",
@@ -159,6 +140,12 @@ def main():
         type=str,
         choices=DISTANCE_FUNCTIONS,
         default=DEFAULT_DISTANCE_FUNC,
+    )
+    test_mode.add_argument(
+        "--output_file",
+        "-out",
+        type=str,
+        default=DEFAULT_TEST_RESULT_FILE,
     )
     test_mode.set_defaults(func=ModeMapper.test)
 
