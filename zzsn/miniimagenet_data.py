@@ -1,8 +1,9 @@
 import os
 import random
 from glob import glob
-from typing import Callable, Iterator, Optional, Union
+from typing import Iterator, Union
 
+import pickle
 import numpy as np
 import pandas as pd
 import torch
@@ -10,8 +11,9 @@ from PIL import Image
 from torch import Tensor
 from torch.utils.data import DataLoader, Dataset
 
-from zzsn.constants import DATASET_DIR, SPLITS_DIR, X_DIM
-
+from zzsn.constants import MINIIMAGENET_DIR, MINIIMAGENET_SPLITS_DIR \
+    , MINIIMAGENET_TRAINCL, MINIIMAGENET_VALIDCL, MINIIMAGENET_TESTCL, MINIIMAGENET_SAMPLES_PER_CLASS \
+    , MINIIMAGENET_IMG_SHAPE
 
 class BatchSampler(object):
     def __init__(self, n_classes: int, n_way: int, n_episodes: int) -> None:
@@ -27,57 +29,61 @@ class BatchSampler(object):
             yield torch.randperm(self.n_classes)[: self.n_way]
 
 
-class CustomImageDataset(Dataset):
+class MiniImageNetDataset(Dataset):
     def __init__(
         self,
         annotations_file: str,
         data_dir: str,
         n_support: int,
         n_query: int,
-        transform: Optional[Callable] = None,
-        target_transform: Optional[Callable] = None,
     ) -> None:
-        split: pd.DataFrame = pd.read_csv(annotations_file, names=["class"])
-        self.classes = split["class"].to_numpy()
+        split: pd.DataFrame = pd.read_csv(annotations_file)
+        self.annotations_file = annotations_file
+        self.classes = np.unique(split["label"].to_numpy(dtype=str)) 
         self.n_support: int = n_support
         self.n_query: int = n_query
         self.data_dir: str = data_dir
-        self.transform: Optional[Callable] = transform
-        self.target_transform: Optional[Callable] = target_transform
 
     def __len__(self) -> int:
         return len(self.classes)
 
     def __getitem__(self, idx: int) -> dict[str, Union[str, Tensor]]:
         cl: str = self.classes[idx]
-        files: list = expand_class(cl, self.data_dir)
-        images: list = [read_image(i) for i in files]
+    
+        shape: list
+        if "train" in self.annotations_file:
+            data_file: str = "mini-imagenet-cache-train.pkl"
+            shape = [MINIIMAGENET_TRAINCL, MINIIMAGENET_SAMPLES_PER_CLASS, *MINIIMAGENET_IMG_SHAPE]
+        elif "test" in self.annotations_file:
+            shape = [MINIIMAGENET_TESTCL, MINIIMAGENET_SAMPLES_PER_CLASS, *MINIIMAGENET_IMG_SHAPE]
+            data_file: str = "mini-imagenet-cache-test.pkl"
+        elif "val" in self.annotations_file: 
+            data_file: str = "mini-imagenet-cache-val.pkl"
+            shape = [MINIIMAGENET_VALIDCL, MINIIMAGENET_SAMPLES_PER_CLASS, *MINIIMAGENET_IMG_SHAPE]
 
-        if self.transform:
-            rotation: str
-            _, _, rotation = cl.split("/")
-            images = [self.transform(i, rotation) for i in images]
+        with open(os.path.join(self.data_dir, data_file), "rb") as fd:
+            data = pickle.load(fd)
+
+        images: np.ndarray = data["image_data"]
+        images = images.reshape(shape)[idx]
+        
         d: dict[str, Union[str, Tensor]] = extract_episode(
             self.n_support, self.n_query, cl, images
         )
         return d
-
-
-def expand_class(label: str, data_dir: str) -> list[str]:
-    alphabet: str
-    character: str
-    alphabet, character, _ = label.split("/")
-    img_dir: str = os.path.join(data_dir, alphabet, character)
-    files: list[str] = sorted(glob(os.path.join(img_dir, "*.png")))
-    return files
-
+    
+    def _initialize_classes(
+        self,
+        split: pd.DataFrame,
+    ) -> np.ndarray:
+        return np.unique(split["label"].to_numpy(dtype=str))
 
 def extract_episode(
-    n_support: int, n_query: int, cl: str, images: list[Image]
+    n_support: int, n_query: int, cl: str, images: list[np.array]
 ) -> dict[str, Union[str, Tensor]]:
     n_examples: int = len(images)
     images_tensor: list[Tensor] = [convert_to_tensor(i) for i in images]
-
+    
     example_inds: list[int] = random.sample(
         range(n_examples), n_support + n_query
     )
@@ -95,33 +101,23 @@ def extract_episode(
     }
 
 
-def convert_to_tensor(x: Image) -> Tensor:
-    xt: Tensor = 1.0 - torch.from_numpy(
-        np.array(x, np.float32, copy=False)
-    ).transpose(0, 1).contiguous().view(1, x.size[0], x.size[1])
+def convert_to_tensor(x: np.array) -> Tensor:
+    xt: Tensor = 1 - torch.from_numpy(
+        np.array(x/255, np.float32, copy=False)
+    ).permute(2,0,1).contiguous()
+    
     return xt
 
-
-def read_image(path: str) -> Image:
-    return Image.open(path)
-
-
-def transform_image(img: Image, rot: str) -> Image:
-    return img.rotate(float(rot[3:])).resize((X_DIM[1], X_DIM[2]))
-
-
 def create_dataset(
-    split: str, n_support: int, n_query: int, transform: Callable
-) -> CustomImageDataset:
-    ds: CustomImageDataset = CustomImageDataset(
-        annotations_file=os.path.join(SPLITS_DIR, split + ".txt"),
+    split: str, n_support: int, n_query: int
+) -> MiniImageNetDataset:
+    ds: MiniImageNetDataset = MiniImageNetDataset(
+        annotations_file=os.path.join(MINIIMAGENET_SPLITS_DIR, split + ".csv"),
+        data_dir=MINIIMAGENET_DIR,
         n_support=n_support,
         n_query=n_query,
-        data_dir=DATASET_DIR,
-        transform=transform,
     )
     return ds
-
 
 def create_data_loader(
     split: str,
@@ -129,12 +125,13 @@ def create_data_loader(
     n_query: int,
     n_way: int,
     n_episodes: int,
-    transform=transform_image,
 ) -> DataLoader:
-    ds: CustomImageDataset = create_dataset(
-        split=split, n_support=n_support, n_query=n_query, transform=transform
+    ds: MiniImageNetDataset = create_dataset(
+        split=split, n_support=n_support, n_query=n_query
     )
     sampler: BatchSampler = BatchSampler(
         n_classes=len(ds), n_way=n_way, n_episodes=n_episodes
     )
-    return DataLoader(dataset=ds, batch_sampler=sampler, num_workers=0)
+    dl = DataLoader(dataset=ds, batch_sampler=sampler, num_workers=0)
+    
+    return dl

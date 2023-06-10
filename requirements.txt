@@ -4,3 +4,5 @@ Pillow
 tqdm
 torch
 scikit-learn
+kaggle
+torchmetrics

@@ -2,13 +2,16 @@ import numpy as np
 import torch
 from torch.optim import AdamW, lr_scheduler
 from torch.utils.data import DataLoader
+import os
 
-from zzsn.constants import HID_DIM, RANDOM_SEED, X_DIM, Z_DIM
-from zzsn.data import create_data_loader
-from zzsn.model import ProtoNetwork, evaluate, train
-from zzsn.utils import euclidean_dist
+from zzsn.constants import HID_DIM, RANDOM_SEED, X_DIM, Z_DIM, OMNIGLOT, MINIIMAGENET, MODELS_PATH
 
-DISTANCE_FUNC_MAPPER = {"euclidean": euclidean_dist}
+import zzsn.omniglot_data as omniglot
+import zzsn.miniimagenet_data as mimagenet
+from zzsn.model import ProtoNetwork, evaluate, train, get_model_name
+from zzsn.utils import euclidean_dist, cosine_dist
+
+DISTANCE_FUNC_MAPPER = {"euclidean": euclidean_dist, "cosine": cosine_dist}
 
 
 def run_train(
@@ -20,7 +23,16 @@ def run_train(
     n_eval_episodes: int,
     learning_rate: float,
     distance_func: str,
+    dataset: str,
 ) -> None:
+    
+    if dataset == MINIIMAGENET:
+        create_data_loader = mimagenet.create_data_loader
+    elif dataset == OMNIGLOT:
+        create_data_loader = omniglot.create_data_loader
+    else:
+        exit(-1)
+
     dl_train: DataLoader = create_data_loader(
         split="train",
         n_support=n_support,
@@ -48,9 +60,9 @@ def run_train(
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     custom_model: ProtoNetwork = ProtoNetwork(
-        x_dim=X_DIM,
-        hid_dim=HID_DIM,
-        z_dim=Z_DIM,
+        x_dim=X_DIM[dataset],
+        hid_dim=HID_DIM[dataset],
+        z_dim=Z_DIM[dataset],
         dist=DISTANCE_FUNC_MAPPER.get(distance_func, euclidean_dist),
     ).to(device)
 
@@ -90,7 +102,7 @@ def run_train(
         # save model state with best accuracy
         if val_acc > best_acc:
             best_acc = val_acc
-            torch.save(custom_model.state_dict(), "best_model.bin")
+            torch.save(custom_model.state_dict(), os.path.join(MODELS_PATH, get_model_name(dataset, n_way, n_support, n_query, n_train_episodes)) + ".bin" )
 
     # check model accuracy on test data
     print("Running test...")
