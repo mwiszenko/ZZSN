@@ -87,7 +87,7 @@ def run_train(
             sched=scheduler,
         )
 
-        print("  Train accuracy: {0:.2f}".format(train_acc))
+        print("  Train accuracy: {0:.4f}".format(train_acc))
         print("  Train loss: {0:.2f}".format(train_loss))
 
         print("Running validation...")
@@ -96,7 +96,7 @@ def run_train(
         val_loss: float
         val_acc, val_loss = evaluate(model=custom_model, data_loader=dl_val)
 
-        print("  Validation accuracy: {0:.2f}".format(val_acc))
+        print("  Validation accuracy: {0:.4f}".format(val_acc))
         print("  Validation loss: {0:.2f}".format(val_loss))
 
         # save model state with best accuracy
@@ -110,4 +110,4 @@ def run_train(
     test_acc: float
     test_acc, _ = evaluate(model=custom_model, data_loader=dl_test)
 
-    print("  Test accuracy: {0:.2f}".format(test_acc))
+    print("  Test accuracy: {0:.4f}".format(test_acc))
