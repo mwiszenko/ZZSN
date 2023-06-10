@@ -12,8 +12,8 @@ from zzsn.constants import (
     DEFAULT_N_SUPPORT,
     DEFAULT_N_TRAIN_EPISODES,
     DEFAULT_N_WAY,
-    DISTANCE_FUNCTIONS,
     DEFAULT_TEST_RESULT_FILE,
+    DISTANCE_FUNCTIONS,
     MINIIMAGENET,
     MINIIMAGENET_SCRIPT_PATH,
     OMNIGLOT,
@@ -99,11 +99,7 @@ def main():
         choices=DISTANCE_FUNCTIONS,
         default=DEFAULT_DISTANCE_FUNC,
     )
-    train_mode.add_argument(
-        "--download_data",
-        "-dd",
-        action='store_true'
-    )
+    train_mode.add_argument("--download_data", "-dd", action="store_true")
     train_mode.add_argument(
         "--dataset",
         "-ds",

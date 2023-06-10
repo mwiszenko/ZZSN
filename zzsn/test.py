@@ -1,8 +1,6 @@
 import os
 
-import numpy as np
 import torch
-from torch.optim import AdamW, lr_scheduler
 from torch.utils.data import DataLoader
 
 import zzsn.miniimagenet_data as mimagenet
@@ -12,9 +10,7 @@ from zzsn.constants import (
     MINIIMAGENET,
     MODELS_PATH,
     OMNIGLOT,
-    RANDOM_SEED,
     TEST_ITERATIONS,
-    DEFAULT_TEST_RESULT_FILE,
     X_DIM,
     Z_DIM,
 )
