@@ -5,7 +5,6 @@ from zzsn.constants import (
     DATASETS,
     DEFAULT_DATASET,
     DEFAULT_DISTANCE_FUNC,
-    DEFAULT_DOWNLOAD_DATA,
     DEFAULT_EPOCHS,
     DEFAULT_LEARNING_RATE,
     DEFAULT_MODEL,
@@ -102,8 +101,7 @@ def main():
     train_mode.add_argument(
         "--download_data",
         "-dd",
-        type=bool,
-        default=DEFAULT_DOWNLOAD_DATA,
+        action='store_true'
     )
     train_mode.add_argument(
         "--dataset",
